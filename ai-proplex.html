@@ -1,0 +1,295 @@
+<html>
+<body>
+<div id="e">
+
+    <h1 id="context">Con Studios
+</h1>
+
+<img src="constudio.png" id="conimg">
+
+
+
+
+
+
+
+
+
+
+</div>
+
+<video autoplay id="e2" muted playsinline fullscreen background="true">
+    <source src="pp3.mp4" type="video/mp4">
+</video>
+
+
+<div class="chat-container">
+    <div class="header"></div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Ask ProPlex anything..." />
+      <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+
+
+
+
+
+
+
+<style>
+
+body{
+background-color: rgb(24, 24, 24);
+
+
+
+
+
+
+}
+
+
+#e{
+height: 60px;
+width: 1875px;
+max-width: 1920px;
+background-color: rgb(48, 48, 48);
+margin-left: -8px;
+margin-top: -8px;
+border-radius: 10px;
+text-align: center;
+
+
+
+}
+
+#conimg{
+height: 10px;
+display: inline-block;
+margin-left: 10px;
+display: inline-block;
+
+
+
+
+
+}
+
+
+
+#context{
+color: grey;
+font-size: 30px;
+display: inline-block;
+margin-top: 10px;
+
+
+
+
+}
+
+#e2{
+height: 170px;
+width: 1845px;
+margin-top: 10px;
+background-color: rgb(48, 48, 48);
+border-radius: 30px;
+
+
+
+}
+
+
+.chat-container {
+      width: 1845px;
+      max-width: 2050px;
+      height: 73vh;
+      background: #242424;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .header {
+      padding: 16px;
+      background: #2d2d2d;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      align-self: flex-end;
+      background-color: #007bff;
+      color: white;
+    font-weight: bold;
+    }
+
+    .ai-message {
+      align-self: flex-start;
+      background-color: #383838;
+      color: #e0e0e0;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 12px;
+      background: #2d2d2d;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 20px;
+      border: 1px solid #444;
+      background: #1a1a1a;
+      color: white;
+      outline: none;
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</style>
+
+
+
+
+<script>
+  const chatBox = document.getElementById('chatBox');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  // Listen for Enter key press
+  userInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  async function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text) return;
+
+    // 1. Display the user's message
+    appendMessage(text, 'user-message');
+    userInput.value = '';
+    sendBtn.disabled = true;
+
+    // 2. Display temporary loading message
+    const loadingDiv = appendMessage('Thinking...', 'ai-message');
+
+    try {
+      // 3. Send request to Node.js backend running on port 3000
+      const response = await fetch('http://localhost:3000/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: text }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Replace loading text with the AI response
+        loadingDiv.textContent = data.reply;
+      } else {
+        // Display backend error message if available
+        loadingDiv.textContent = data.error || 'Server error occurred.';
+      }
+    } catch (error) {
+      console.error('Fetch Error:', error);
+      loadingDiv.textContent = 'Error: Cannot connect to server at http://localhost:3000';
+    } finally {
+      // Re-enable send button and scroll to bottom
+      sendBtn.disabled = false;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  }
+
+  // Helper function to append message bubbles to the chat box
+  function appendMessage(text, className) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${className}`;
+    msgDiv.textContent = text;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return msgDiv;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
